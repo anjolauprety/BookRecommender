@@ -1,0 +1,7 @@
+
+> personalapp@0.0.0 start
+> node app.js
+
+we are connected!!!
+GET /upsertDB Thu Apr 28 2022 18:48:27 GMT-0400 (Eastern Daylight Time)
+inserting

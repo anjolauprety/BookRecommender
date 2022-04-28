@@ -1,0 +1,43 @@
+<body style="background-color:#fde3ff;">
+    <h1> Book Information</h1>
+
+    <table class="table table-bordered table-striped">
+        <thead>
+            <tr>
+                <td>Title</td>
+                <td>Isbn></td>
+                <td>Short Description</td>
+                <td>Long Description</td>
+                <td>Status</td>
+            </tr>
+        </thead>
+        <tbody>
+            <% for (book of bookList) { %>
+                <tr>
+                    <td>
+                        <%= book['title'] %>
+                    </td>
+                    <td>
+                        <%= book['isbn'] %>
+                    </td>
+                    <td>
+                        <%= book['shortDescription'] %>
+                    </td>
+                    <td>
+                        <%= book['longDescription'] %>
+                    </td>
+                    <td>
+                        <%= book['status'] %>
+                    </td>
+                </tr>
+                <% } %>
+        </tbody>
+    </table>
+    <pre>
+
+    <!-- 
+        <%= JSON.stringify(bookList,null,5) %> 
+    -->
+</pre>
+
+</body>

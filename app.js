@@ -13,20 +13,30 @@ const cookieParser = require("cookie-parser"); // to handle cookies
 const session = require("express-session"); // to handle sessions using cookies
 const debug = require("debug")("personalapp:server");
 const layouts = require("express-ejs-layouts");
+const axios = require("axios")
 
 // *********************************************************** //
 //  Loading models
 // *********************************************************** //
-const ToDoItem = require("./models/ToDoItem")
+
+const BookList = require('./models/BookList')
+
+
+// *********************************************************** //
+//  Loading JSON datasets
+// *********************************************************** //
+const bookList = require('./public/data/booklistdata.json')
+
 
 // *********************************************************** //
 //  Connecting to the database
 // *********************************************************** //
 
 const mongoose = require('mongoose');
+//const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
 const mongodb_URI = 'mongodb+srv://anjolauprety:brandeis-123!!!!@cluster0.p4yid.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
-//'mongodb://localhost:27017/cs103a_todo'
-//const mongodb_URI = 'mongodb+srv://cs_sj:BrandeisSpr22@cluster0.kgugl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+//'mongodb+srv://cs_sj:BrandeisSpr22@cluster0.kgugl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
+//mongodb+srv://cs103a:<password>@cluster0.kgugl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
 
 mongoose.connect(mongodb_URI, { useNewUrlParser: true, useUnifiedTopology: true });
 // fix deprecation warnings
@@ -82,7 +92,8 @@ app.use(
 
 
 // here is the code which handles all /login /signin /logout routes
-const auth = require('./routes/auth')
+const auth = require('./routes/auth');
+const { deflateSync } = require("zlib");
 app.use(auth)
 
 // middleware to test is the user is logged in, and if not, send them to the login page
@@ -104,78 +115,64 @@ app.get("/about", (req, res, next) => {
   res.render("about");
 });
 
-app.get("/demopage", (req, res, next) => {
-  res.render("demo");
-});
 
-app.get("/sandbox",
-  (req, res, next) => {
-    res.render("sandbox");
-  }
-);
 
-/*
-    ToDoList routes
-*/
-app.get('/todo',
-  isLoggedIn,   // redirect to /login if user is not logged in
+
+/* ************************
+  Functions needed for the course finder routes
+   ************************ */
+
+/* ************************
+  Loading (or reloading) the data into a collection
+   ************************ */
+// this route loads in the courses into the Course collection
+// or updates the courses if it is not a new collection
+
+app.get('/upsertDB',
   async (req, res, next) => {
-    try {
-      let userId = res.locals.user._id;  // get the user's id
-      let items = await ToDoItem.find({ userId: userId }); // lookup the user's todo items
-      res.locals.items = items;  //make the items available in the view
-      res.render("toDo");  // render to the toDo page
-    } catch (e) {
-      next(e);
-    }
-  }
-)
-
-app.post('/todo/add',
-  isLoggedIn,
-  async (req, res, next) => {
-    try {
-      const { title, description } = req.body; // get title and description from the body
-      const userId = res.locals.user._id; // get the user's id
-      const createdAt = new Date(); // get the current date/time
-      let data = { title, description, userId, createdAt, } // create the data object
-      let item = new ToDoItem(data) // create the database object (and test the types are correct)
-      await item.save() // save the todo item in the database
-      res.redirect('/todo')  // go back to the todo page
-    } catch (e) {
-      next(e);
-    }
-  }
-)
-
-app.get("/todo/delete/:itemId",
-  isLoggedIn,
-  async (req, res, next) => {
-    try {
-      const itemId = req.params.itemId; // get the id of the item to delete
-      await ToDoItem.deleteOne({ _id: itemId }) // remove that item from the database
-      res.redirect('/todo') // go back to the todo page
-    } catch (e) {
-      next(e);
-    }
-  }
-)
-
-app.get("/todo/completed/:value/:itemId",
-  isLoggedIn,
-  async (req, res, next) => {
-    try {
-      const itemId = req.params.itemId; // get the id of the item to delete
-      const completed = req.params.value == 'true';
-      await ToDoItem.findByIdAndUpdate(itemId, { completed }) // remove that item from the database
-      res.redirect('/todo') // go back to the todo page
-    } catch (e) {
-      next(e);
-    }
+    //await Course.deleteMany({})
+    await BookList.insertMany(bookList)
+    const num = await BookList.find({}).count();
+    res.send("data uploaded: " + num)
   }
 )
 
 
+app.post('/bookList/byTitle',
+  // show list of courses in a given subject
+  async (req, res, next) => {
+    const title = req.body.title;
+    const bookList = await BookList.find({ title: title })
+    res.locals.bookList = bookList
+    //res.json(courses)
+    res.render('booklist')
+  }
+)
+
+app.post('/bookList/byStatus',
+  // show list of courses in a given subject
+  async (req, res, next) => {
+    const status = req.body.status;
+    const bookList = await BookList.find({ status: status })
+    res.locals.bookList = bookList
+    //res.json(courses)
+    res.render('booklist')
+  }
+)
+
+app.post('/bookList/byIsbn',
+  // show list of courses in a given subject
+  async (req, res, next) => {
+    const isbn = req.body.isbn;
+    const bookList = await BookList.find({ isbn: isbn })
+    res.locals.bookList = bookList
+    //res.json(courses)
+    res.render('booklist')
+  }
+)
+
+
+app.use(isLoggedIn)
 
 
 // here we catch 404 errors and forward to error handler
@@ -199,7 +196,7 @@ app.use(function (err, req, res, next) {
 //  Starting up the server!
 // *********************************************************** //
 //Here we set the port to use between 1024 and 65535  (2^16-1)
-const port = "27017";
+const port = "4000";
 app.set("port", port);
 
 // and now we startup the server listening on that port
