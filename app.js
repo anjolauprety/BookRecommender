@@ -35,7 +35,7 @@ const bookList = require('./public/data/booklistdata.json')
 const mongoose = require('mongoose');
 require('dotenv').config();
 //const mongodb_URI = 'mongodb://localhost:27017/cs103a_todo'
-const mongodb_URI = process.env.mongodb_URI
+const mongodb_URI = process.env.MONGODB_URI
 //'mongodb+srv://anjolauprety:brandeis-123!!!!@cluster0.p4yid.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 //'mongodb+srv://cs_sj:BrandeisSpr22@cluster0.kgugl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority'
 //mongodb+srv://cs103a:<password>@cluster0.kgugl.mongodb.net/myFirstDatabase?retryWrites=true&w=majority
@@ -198,7 +198,7 @@ app.use(function (err, req, res, next) {
 //  Starting up the server!
 // *********************************************************** //
 //Here we set the port to use between 1024 and 65535  (2^16-1)
-const port = "5000";
+const port = process.env.PORT || "4000";
 console.log('connecting on port ' + port)
 app.set("port", port);
 
@@ -206,8 +206,7 @@ app.set("port", port);
 const http = require("http");
 const server = http.createServer(app);
 
-server.listen(process.env.PORT || '5000');
-
+server.listen(port);
 function onListening() {
   var addr = server.address();
   var bind = typeof addr === "string" ? "pipe " + addr : "port " + addr.port;
