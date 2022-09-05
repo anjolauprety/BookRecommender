@@ -7,7 +7,6 @@ Book Recommendation gives user information of books such as description, pages, 
 Heroku Web Page: 
 https://cpa02-finalv.herokuapp.com
 
-Video Link: (Please login with Brandeis Email)
-https://drive.google.com/file/d/1KtxlJvuo_GLEc7WQAz-EpksfRzMjDfDN/view?usp=sharing
+
 
 
